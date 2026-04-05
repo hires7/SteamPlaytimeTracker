@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using SteamTracker.Models;
 
 
-string apiKey = ":3";
+string apiKey = File.ReadAllText("apikey.txt").Trim();
 string steamId = "76561198302195526";
 
 string url = $"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={apiKey}&steamid={steamId}&format=json";
