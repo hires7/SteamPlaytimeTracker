@@ -482,3 +482,6 @@ $RECYCLE.BIN/
 *.swp
 
 apikey.txt
+steamdata.db
+steamdata.db-shm
+steamdata.db-wal

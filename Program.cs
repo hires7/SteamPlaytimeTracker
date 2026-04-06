@@ -1,6 +1,8 @@
-﻿using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using SteamTracker.Models;
+using SteamTracker.Data;
+using System.IO;
+using System.Data;
 
 
 string apiKey = File.ReadAllText("apikey.txt").Trim();
@@ -33,13 +35,37 @@ try
     if (data?.Response?.Games != null)
     {
         System.Console.WriteLine($"Naslo sa {data.Response.GameCount} hier.");
-        System.Console.WriteLine("Napr:");
 
-        foreach (var game in data.Response.Games)
+        using (var db = new SteamDbContext())
         {
-            int hodiny = game.PlaytimeForever / 60;
-            Console.WriteLine($"- Hra (ID: {game.AppId}): Nahratých {game.PlaytimeForever} minút (cca {hodiny} hodín).");
+            db.Database.EnsureCreated();
+
+            int savedGamesCount = 0;
+            DateTime today = DateTime.UtcNow.Date;
+
+            foreach (var game in data.Response.Games)
+            {
+                if (game.PlaytimeForever == 0) continue;
+
+                var record = new DailyRecord
+                {
+                    Date = today,
+                    AppId = game.AppId,
+                    PlaytimeForever = game.PlaytimeForever
+                };
+                db.DailyRecords.Add(record);
+
+                savedGamesCount++;
+            }
+
+            db.SaveChanges();
+
+            System.Console.WriteLine($"Ulozenych {savedGamesCount} zaznamov pre ({today:yyyy-MM-dd}).");
         }
+    }
+    else
+    {
+        System.Console.WriteLine("Daco se pokazilo");
     }
 
 }
